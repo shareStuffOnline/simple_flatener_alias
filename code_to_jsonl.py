@@ -2,10 +2,11 @@ import os
 import json
 import sys
 import subprocess
-
+import sys
+#print("Script is running", file=sys.stderr)
 def process_directory(directory):
     # Define the file extensions to process
-    allowed_extensions = {".txt", ".py", ".html", ".css"}
+    allowed_extensions = {".txt", ".py", ".html", ".css", ".md"}
 
     # Get the name of the current script to exclude it
     current_script = os.path.basename(__file__)
