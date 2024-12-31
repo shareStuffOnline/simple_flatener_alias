@@ -2,8 +2,8 @@ import os
 import json
 import sys
 import subprocess
-import sys
-#print("Script is running", file=sys.stderr)
+
+# Define the function to process directories
 def process_directory(directory):
     # Define the file extensions to process
     allowed_extensions = {".txt", ".py", ".html", ".css", ".md"}
@@ -19,7 +19,7 @@ def process_directory(directory):
         for filename in files:
             # Get the file extension
             _, file_extension = os.path.splitext(filename)
-            
+
             # Check if the file extension is in the allowed list and exclude the script itself
             if file_extension.lower() in allowed_extensions and filename != current_script:
                 file_path = os.path.join(root, filename)
@@ -29,7 +29,7 @@ def process_directory(directory):
 
                 # Flatten newlines and escape double quotes
                 flattened_text = content.replace("\n", " ")
-                flattened_text = flattened_text.replace('"', '\\"')
+                flattened_text = flattened_text.replace('"', '\\\"')
 
                 # Create the JSON record
                 record = {
@@ -38,11 +38,34 @@ def process_directory(directory):
                 }
                 records.append(record)
 
+    # Additional logic to process static and template folders if present
+    for subfolder in ["static", "template"]:
+        subfolder_path = os.path.join(directory, subfolder)
+        if os.path.exists(subfolder_path):
+            for root, _, files in os.walk(subfolder_path):
+                for filename in files:
+                    _, file_extension = os.path.splitext(filename)
+                    if file_extension.lower() in allowed_extensions:
+                        file_path = os.path.join(root, filename)
+
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+
+                        flattened_text = content.replace("\n", " ")
+                        flattened_text = flattened_text.replace('"', '\\\"')
+
+                        record = {
+                            "filename": os.path.relpath(file_path, start=directory),
+                            "text": flattened_text
+                        }
+                        records.append(record)
+
     # Convert all records to JSONL format
     jsonl_output = "\n".join(json.dumps(record) for record in records)
 
     # Wrap the JSONL output in the specified template
-    template = f'''"on_disk_content":"""You are to use the following data:\n{jsonl_output}\n  to answer the question: """'''
+    template = f'''
+"on_disk_content": """You are to use the following data from disk:\n{jsonl_output}\n  """'''
 
     # Copy the templated output to the Ubuntu clipboard
     try:
@@ -58,3 +81,4 @@ if __name__ == "__main__":
     # Get the directory to process (default to current directory)
     target_directory = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
     process_directory(target_directory)
+
