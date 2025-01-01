@@ -6,7 +6,7 @@ from datetime import datetime
 
 def process_directory(directory):
     # Define the file extensions to process
-    allowed_extensions = {".txt", ".py", ".html", ".css", ".md"}
+    allowed_extensions = {".txt", ".py", ".html", ".css", ".md", ".json",".js"}
 
     # Get the name of the current script to exclude it
     current_script = os.path.basename(__file__)
